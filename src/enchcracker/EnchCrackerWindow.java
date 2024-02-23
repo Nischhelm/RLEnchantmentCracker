@@ -445,6 +445,7 @@ public class EnchCrackerWindow extends StyledFrameMinecraft {
 								progressBar.setProgress(Float.NaN);
 								break;
 							case 1:
+								//This only happens if we find the xpseed directly on the first set of tested bookshelf lvls
 								progressBar.setText(String.format(translate("enchCrack.result"), singleSeedCracker.getSeed()));
 								progressBar.setProgress(0f);
 								if (xpSeed1TextField.getText().isEmpty()) {
@@ -480,6 +481,9 @@ public class EnchCrackerWindow extends StyledFrameMinecraft {
 								progressBar.setProgress(Float.NaN);
 								if (xpSeed1TextField.getText().isEmpty()) {
 									xpSeed1TextField.setText(String.format("%08X", singleSeedCracker.getSeed()));
+									darknessConsumed += currentDarknessSteps();
+									//darknessCounter.setText(String.valueOf(currentDarknessSteps()));
+									resetCracker();
 								} else if (xpSeed2TextField.getText().isEmpty()) {
 									xpSeed2TextField.setText(String.format("%08X", singleSeedCracker.getSeed()));
 								}
@@ -546,6 +550,7 @@ public class EnchCrackerWindow extends StyledFrameMinecraft {
 			Log.info("Reset the cracker");
 			singleSeedCracker.abortAndThen(() -> {
 				resetCracker();
+				progressBar.setText(translate("enchCrack.check"));
 			});
 		});
 
@@ -595,7 +600,7 @@ public class EnchCrackerWindow extends StyledFrameMinecraft {
 			long seed2High = ((long) xpSeed2 << 16) & 0x0000_ffff_ffff_0000L;
 			found = false;
 			int stepCount = 1;
-			steploop: for (; stepCount < 2000; stepCount ++) {
+			steploop: for (; stepCount < 100; stepCount ++) {
 				for (int seed1Low = 0; seed1Low < 65536; seed1Low++) {
 
 					long newSeed = (seed1High | seed1Low);
@@ -737,6 +742,7 @@ public class EnchCrackerWindow extends StyledFrameMinecraft {
 				while (timerIsRunning) {
 					float newSecondsPercent = ((float) (System.currentTimeMillis()-startTime) % 30000)/30000;
 					if(newSecondsPercent < oldSecondsPercent){	//Only when we roll over from 30s to 0s
+						System.out.println("Darkness steps at" + currentDarknessSteps()+ ", consumed "+darknessConsumed);
 						if(waitingOnAnEnchant) {
 							int dummiesNeeded = Integer.parseInt(outDummies.getText());
 							if (dummiesNeeded > 0) {
@@ -1326,7 +1332,7 @@ public class EnchCrackerWindow extends StyledFrameMinecraft {
 		slot2EnchantField.setText("");
 		slot3EnchantField.setText("");
 
-		progressBar.setText(translate("enchCrack.check"));
+		//progressBar.setText(translate("enchCrack.check"));
 		progressBar.setProgress(-1f);
 		btnCalculate.setText(translate("enchCrack.calculate"));
 		btnCalculate.setProgress(-1f);
